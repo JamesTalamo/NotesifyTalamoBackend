@@ -10,6 +10,6 @@ router.post('/addPost', postControls.createNewPost)
 router.put('/:name', postControls.getOnePost)
 router.get('/allPost', postControls.getAllPost)
 
-
+// 
 
 module.exports = router
