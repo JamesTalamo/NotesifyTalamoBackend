@@ -46,21 +46,27 @@ const loginApi = async (req, res) => {
                 { expiresIn: '1d' }
             )
 
+            // console.log(cookieId) /////////////////////
+
             ifExist.status = 'online'
             ifExist.cookieId = cookieId
+
+            // console.log(cookieId)
             await ifExist.save() // para ma save
 
             // res.cookie('cookieId', cookieId, { /*httpOnly: true,*/ maxAge: 24 * 60 * 60 * 1000 })
 
+            // console.log(cookieId)
+            
             res.cookie('cookieId', cookieId, {
-                path: '/auth',
+                path: '/',
                 httpOnly: false,
                 sameSite: 'none',
                 secure: true,
                 maxAge: 24 * 60 * 60 * 1000
             })
 
-            res.status(200).json({ "success": "welcome" })
+            res.status(200).json({ "success": ifExist.cookieId})
         } else {
             res.status(400).json({ "error": "wrong password" })
         }
@@ -68,12 +74,10 @@ const loginApi = async (req, res) => {
     } catch (error) {
         res.status(500).json({ "error": error.message })
     }
-
-
 }
 
 let logoutApi = async (req, res) => {
-    const cookieId = req.cookies.cookieId
+    const {cookieId} = req.params
 
     if (!cookieId) return res.status(401).json({ "error": "there's no cookieId in your cookies!" })
 
@@ -84,6 +88,7 @@ let logoutApi = async (req, res) => {
         await ifExist.save()
 
         res.status(200).json({ "success": `${ifExist.username} has been logged out!` })
+        // console.log(cookieId)
     } catch (error) {
         res.status(400).json({ "error": error.message })
     }
@@ -98,14 +103,16 @@ let getAllUsers = async (req, res) => {
 
 let oneUser = async (req, res) => {
     let { cookieId } = req.params
+    // console.log(cookieId)
     let person = await User.findOne({ cookieId: cookieId })
 
     try {
         if (!person) res.status(400).json({ "error": "no username like that" })
-
+        // May problema ako, yung cookie dun sa client side (application tab dev tool) is 
+        // hindi kapareha nung cookie na nasasave sa database, kaya hindi gumagawa tong function nato, ayusin mo ito in the future
         res.json({ "success": person }).status(200)
     } catch (error) {
-        res.status(500).json({ "error": error.message })
+        res.status(400).json({ "error": error.message })
     }
 }
 
